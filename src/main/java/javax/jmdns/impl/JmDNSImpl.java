@@ -1281,11 +1281,12 @@ public class JmDNSImpl extends JmDNS implements DNSStatefulObject, DNSTaskStarte
             }
         }
 
-        if (
-                DNSRecordType.TYPE_PTR.equals(rec.getRecordType())
-                || ( DNSRecordType.TYPE_SRV.equals(rec.getRecordType()) && Operation.Remove.equals(operation))
-        )
-        {
+        boolean isPTR = DNSRecordType.TYPE_PTR.equals(rec.getRecordType());
+        boolean isRemovedSRV = DNSRecordType.TYPE_SRV.equals(rec.getRecordType()) && Operation.Remove.equals(operation);
+        boolean isReaddedSRV = DNSRecordType.TYPE_SRV.equals(rec.getRecordType())
+                               && Operation.Add.equals(operation)
+                               && this.getCache().getDNSEntry(rec.getName(), DNSRecordType.TYPE_PTR, DNSRecordClass.CLASS_ANY) != null;
+        if (isPTR || isRemovedSRV || isReaddedSRV) {
             if ((event.getInfo() == null) || !event.getInfo().hasData()) {
                 // We do not care about the subtype because the info is only used if complete and the subtype will then be included.
                 ServiceInfo info = this.getServiceInfoFromCache(event.getType(), event.getName(), "", false);
