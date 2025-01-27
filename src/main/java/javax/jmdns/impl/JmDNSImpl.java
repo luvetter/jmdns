@@ -1285,7 +1285,16 @@ public class JmDNSImpl extends JmDNS implements DNSStatefulObject, DNSTaskStarte
         boolean isRemovedSRV = DNSRecordType.TYPE_SRV.equals(rec.getRecordType()) && Operation.Remove.equals(operation);
         boolean isReaddedSRV = DNSRecordType.TYPE_SRV.equals(rec.getRecordType())
                                && Operation.Add.equals(operation)
-                               && this.getCache().getDNSEntry(rec.getName(), DNSRecordType.TYPE_PTR, DNSRecordClass.CLASS_ANY) != null;
+                               && this.getCache().getDNSEntryList(rec.getType(), DNSRecordType.TYPE_PTR, DNSRecordClass.CLASS_ANY)
+                                          .stream()
+                                          .filter(e -> e instanceof DNSRecord.Pointer)
+                                          .map(DNSRecord.Pointer.class::cast)
+                                          .anyMatch(e -> e.getAlias().equals(rec.getName()));
+        logger.trace("{}: {}", operation, event);
+        logger.trace("{}: {}", operation, rec.getKey());
+        logger.trace("{} is a PTR: {}", rec.getName(), isPTR);
+        logger.trace("{} is a removed SRV: {}", rec.getName(), isRemovedSRV);
+        logger.trace("{} is a readded SRV: {}", rec.getName(), isReaddedSRV);
         if (isPTR || isRemovedSRV || isReaddedSRV) {
             if ((event.getInfo() == null) || !event.getInfo().hasData()) {
                 // We do not care about the subtype because the info is only used if complete and the subtype will then be included.
