@@ -1289,7 +1289,7 @@ public class JmDNSImpl extends JmDNS implements DNSStatefulObject, DNSTaskStarte
                                           .stream()
                                           .filter(DNSRecord.Pointer.class::isInstance)
                                           .map(DNSRecord.Pointer.class::cast)
-                                          .anyMatch(e -> e.getAlias().equals(rec.getName()));
+                                          .anyMatch(pointer -> rec.getName().equals(pointer.getAlias()));
         if (isPTR || isRemovedSRV || isReaddedSRV) {
             if ((event.getInfo() == null) || !event.getInfo().hasData()) {
                 // We do not care about the subtype because the info is only used if complete and the subtype will then be included.
